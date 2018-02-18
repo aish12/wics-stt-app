@@ -4,7 +4,7 @@
     <title>Speech Sample</title>
     <meta charset="utf-8" />
 </head>
-<body style="font-family:'Open Sans',Open Sans,Open Sans,sans-serif; font-size:13px; background-color: Gainsboro">
+<body style="font-family:'Open Sans',Open Sans,Open Sans,sans-serif; font-size:13px;" background="mic.png">
     <div id="warning">
         <h1 style="font-weight:500;">SDK not found.</h1>
         <h2 style="font-weight:500;">Please execute <code>npm run bundle</code> and reload.</h2>
@@ -14,8 +14,8 @@
             <tr>
                 <td></td>
                 <td>
-                    <h1 style="font-weight:500; background-color: DarkGray; padding: 10px">Speech Analysis</h1>
-                    <h4 style="font-weight:200;">WiCS Hacks 2018 project by Aish S, Claire D, and JosieKate C, using Microsoft Cognitive Services</h4>
+                    <h1 style="font-weight:900; background-color: LightSeaGreen; padding: 10px;">On Cue™</h1>
+                    <h4 style="font-weight:200; color: White">WiCS Hacks 2018 project by Aish S, Claire D, and JosieKate C, using Microsoft Cognitive Services</h4>
                 </td>
             </tr>
             <tr>
@@ -41,8 +41,8 @@
             <tr>
                 <td></td>
                 <td>
-                    <button id="startBtn" disabled="disabled" style = "font-size: 10px; color: White; background-color: Green; border: 10px solid Green">Start</button>
-                    <button id="stopBtn" disabled="disabled" style = "color: White; background-color: Tomato; border: 10px solid Tomato">Stop</button>
+                    <button id="startBtn" disabled="disabled" style = "font-size: 15px; color: White; background-color: Green; border: 10px solid Green">Start</button>
+                    <button id="stopBtn" disabled="disabled" style = "font-size: 15px; color: White; background-color: Tomato; border: 10px solid Tomato">Stop</button>
                     <input type="file" id="filePicker" accept=".wav" style="display:none"/>
                 </td>
             </tr>
@@ -51,23 +51,25 @@
                 <td>
                     <table>
                         <tr>
-                            <td>Analysis:</td>
+                            <td style = "color: White">Analysis:</td>
                         </tr>
                         <tr>
                             <td>
-                                <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px; background-color: Gainsboro; border: 2px solid Gainsboro"></textarea>
+                                <h6 id="phraseDiv" style="font-weight:200; font-size: 15px; display: inline-block;width:500px;height:200px; background-color: transparent; border: 2px solid transparent; color: White"></h6>
                             </td>
                             <td style="vertical-align: top">
-                                <span id="hypothesisDiv" style="width:200px;height:200px;display:block;"></span>
+                                <span id="hypothesisDiv" style="font-size: 15px; width:200px;height:200px;display:block;"></span>
                             </td>
+                            <td><h2 id="phraseDiv2" style="display: inline-block;width:500px;height:200px; background-color: transparent; border: 2px solid transparent; color: Black"></h2></td>
                         </tr>
                     </table>
                 </td>
             </tr>
             <tr>
                 <td align="right"></td>
-                <td align="left"><span id="statusDiv"></span></td>
+                <td align="left"><span id="statusDiv" style="color: transparent;"></span></td>
             </tr>
+
         </table>
     </div>
 
@@ -216,7 +218,7 @@
     <!-- Browser Hooks -->
     <script>
         var badWords = ["um", "uh", "like", "actually", "basically", "literally", "ya know", "fine", "shit", "so", "fuck", "bitch", "kinda", "hate", "whatever", "stuff"];
-        var startBtn, stopBtn, hypothesisDiv, phraseDiv, statusDiv;
+        var startBtn, stopBtn, hypothesisDiv, phraseDiv, phraseDiv2, statusDiv;
         var key, languageOptions, formatOptions, recognitionMode, inputSource, filePicker;
         var SDK;
         var recognizer;
@@ -227,6 +229,7 @@
             startBtn = document.getElementById("startBtn");
             stopBtn = document.getElementById("stopBtn");
             phraseDiv = document.getElementById("phraseDiv");
+            phraseDiv2 = document.getElementById("phraseDiv2");
             hypothesisDiv = document.getElementById("hypothesisDiv");
             statusDiv = document.getElementById("statusDiv");
             key = document.getElementById("key");
@@ -255,6 +258,7 @@
 
                     hypothesisDiv.innerHTML = "";
                     phraseDiv.innerHTML = "";
+                    phraseDiv2.innerHTML = "";
                     RecognizerStart(SDK, recognizer);
                     startBtn.disabled = true;
                     stopBtn.disabled = false;
@@ -277,6 +281,7 @@
                 Setup();
                 hypothesisDiv.innerHTML = "";
                 phraseDiv.innerHTML = "";
+                phraseDiv2.innerHTML = "";
                 RecognizerStart(SDK, recognizer);
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
@@ -338,7 +343,7 @@
                 result += json[index];
                 index += 1;
             }
-            var target_words = ["um", "ah", "like", "actually", "totally", "so"]
+            var target_words = ["um", "uh", "like", "actually", "basically", "literally", "ya know", "fine", "shit", "so", "f***", "b****", "kinda", "hate", "whatever", "stuff", "yeah", "f******"]
 
 
             var count_filler_words = {};
@@ -374,11 +379,15 @@
 
             var analysis = "";
             for (var i = 0; i < target_words.length; i++) {
-                if (count_filler_words[target_words[i]] > 0)
-                    analysis += " You said " + target_words[i] + " " + count_filler_words[target_words[i]] + " times.\n";
+                if (count_filler_words[target_words[i]] == 1)
+                    analysis += " You said \"" + target_words[i] + "\" 1 time.\n";
+                if (count_filler_words[target_words[i]] > 1)
+                    analysis += " You said \"" + target_words[i] + "\" " + count_filler_words[target_words[i]] + " times.\n";
+
             }
-            analysis += "\nOverall, " + (num_filler/speech_words.length* 100) + " % of your speech consisted of filler words.\n"
-            phraseDiv.innerHTML += result + "\n" + analysis + "\n";
+            analysis += "\nOverall, " + Math.round((num_filler/speech_words.length* 100), 2) + " % of your speech consisted of filler words.\n"
+            phraseDiv.innerHTML += result + "\n";
+            phraseDiv2.innerHTML += analysis + "\n";
 
             
         }
