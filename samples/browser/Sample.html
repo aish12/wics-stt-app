@@ -4,9 +4,9 @@
     <title>Speech Sample</title>
     <meta charset="utf-8" />
 </head>
-<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; background-color: Lavender">
+<body style="font-family:'Open Sans',Open Sans,Open Sans,sans-serif; font-size:13px; background-color: Gainsboro">
     <div id="warning">
-        <h1 style="font-weight:500;">ition SDK not found.</h1>
+        <h1 style="font-weight:500;">SDK not found.</h1>
         <h2 style="font-weight:500;">Please execute <code>npm run bundle</code> and reload.</h2>
     </div>
     <div id="content" style="display:none">
@@ -14,8 +14,8 @@
             <tr>
                 <td></td>
                 <td>
-                    <h1 style="font-weight:500;">Speech Recognition</h1>
-                    <h2 style="font-weight:500;">Microsoft Cognitive Services</h2>
+                    <h1 style="font-weight:500; background-color: DarkGray; padding: 10px">Speech Analysis</h1>
+                    <h4 style="font-weight:200;">WiCS Hacks 2018 project by Aish S, Claire D, and JosieKate C, using Microsoft Cognitive Services</h4>
                 </td>
             </tr>
             <tr>
@@ -41,8 +41,8 @@
             <tr>
                 <td></td>
                 <td>
-                    <button id="startBtn" disabled="disabled">Start</button>
-                    <button id="stopBtn" disabled="disabled">Stop</button>
+                    <button id="startBtn" disabled="disabled" style = "font-size: 10px; color: White; background-color: Green; border: 10px solid Green">Start</button>
+                    <button id="stopBtn" disabled="disabled" style = "color: White; background-color: Tomato; border: 10px solid Tomato">Stop</button>
                     <input type="file" id="filePicker" accept=".wav" style="display:none"/>
                 </td>
             </tr>
@@ -51,12 +51,11 @@
                 <td>
                     <table>
                         <tr>
-                            <td>Results:</td>
-                            <td>Current hypothesis:</td>
+                            <td>Analysis:</td>
                         </tr>
                         <tr>
                             <td>
-                                <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px"></textarea>
+                                <textarea id="phraseDiv" style="display: inline-block;width:500px;height:200px; background-color: Gainsboro; border: 2px solid Gainsboro"></textarea>
                             </td>
                             <td style="vertical-align: top">
                                 <span id="hypothesisDiv" style="width:200px;height:200px;display:block;"></span>
@@ -66,7 +65,7 @@
                 </td>
             </tr>
             <tr>
-                <td align="right">Status:</td>
+                <td align="right"></td>
                 <td align="left"><span id="statusDiv"></span></td>
             </tr>
         </table>
@@ -196,7 +195,7 @@
                         // console.log(JSON.stringify(event)); // Debug information
                         break;
                     default:
-                        console.log("arg"); // Debug information
+                        console.log(""); // Debug information
                 }
             })
             .On(() => {
@@ -324,16 +323,64 @@
         }
 
         function UpdateRecognizedPhrase(json) {
+
+            // Installed npm packages: jquery underscore request express
+// jade shelljs passport http sys lodash async mocha chai sinon
+// sinon-chai moment connect validator restify ejs ws co when
+// helmet wrench brain mustache should backbone forever debug jsdom
             hypothesisDiv.innerHTML = "";
             var index = 56;
-            var speech = "";
+            var result = "", speech = "";
+
 
             // print only the text the user speaks
             while(json[index] != '\"') {
-                speech += json[index];
+                result += json[index];
                 index += 1;
             }
-            phraseDiv.innerHTML += speech + "\n";
+            var target_words = ["um", "ah", "like", "actually", "totally", "so"]
+
+
+            var count_filler_words = {};
+
+            // initialize dictionary that will contain counts
+            for (var i = 0; i < target_words.length; i++) {
+              count_filler_words[target_words[i]] = 0;
+            }
+            speech = result.toLowerCase();
+            speech = speech.replace('?', '');
+            speech = speech.replace('!', '');
+            speech = speech.replace('.', '');
+            speech = speech.replace(',', '');
+            speech = speech.replace(';', '');
+            speech = speech.replace(':', '');
+            speech = speech.replace('-', '');
+            var speech_words = speech.split(" ");
+            var word;
+            var target;
+            var num_filler = 0;
+            for (var i = 0; i < target_words.length; i++) {
+              target = target_words[i];
+              for (var j = 0; j < speech_words.length; j++) {
+                //console.log(speech.substring(j, j + target.length));
+                word = speech_words[j];
+                if (word == target) {
+                  count_filler_words[word] += 1;
+                  num_filler += 1;
+                }
+              }
+            }
+            console.log(count_filler_words);
+
+            var analysis = "";
+            for (var i = 0; i < target_words.length; i++) {
+                if (count_filler_words[target_words[i]] > 0)
+                    analysis += " You said " + target_words[i] + " " + count_filler_words[target_words[i]] + " times.\n";
+            }
+            analysis += "\nOverall, " + (num_filler/speech_words.length* 100) + " % of your speech consisted of filler words.\n"
+            phraseDiv.innerHTML += result + "\n" + analysis + "\n";
+
+            
         }
 
         function OnComplete() {
