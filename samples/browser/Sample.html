@@ -4,9 +4,9 @@
     <title>Speech Sample</title>
     <meta charset="utf-8" />
 </head>
-<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+<body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px; background-color: Lavender">
     <div id="warning">
-        <h1 style="font-weight:500;">Speech Recognition SDK not found.</h1>
+        <h1 style="font-weight:500;">ition SDK not found.</h1>
         <h2 style="font-weight:500;">Please execute <code>npm run bundle</code> and reload.</h2>
     </div>
     <div id="content" style="display:none">
@@ -19,53 +19,23 @@
                 </td>
             </tr>
             <tr>
-                <td align="right"><a href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</a>:</td>
-                <td><input id="key" type="text" size="40" value="YOUR_BING_SPEECH_API_KEY"></td>
+                <td id="key" value="692f7480d0754e20a1d095cf7fc73be1"></td>
             </tr>
             <tr>
-                <td align="right">Language:</td>
-                <td align="left">
-                    <select id="languageOptions">
-                        <option value="ar-EG">Arabic - EG</option>
-                        <option value="zh-CN">Chinese - CN</option>
-                        <option value="en-GB">English - GB</option>
-                        <option value="en-US" selected="selected">English - US</option>
-                        <option value="fr-FR">French - FR</option>
-                        <option value="de-DE">German - DE</option>
-                        <option value="it-IT">Italian - IT</option>
-                        <option value="ja-JP">Japanese - JP</option>
-                        <option value="pt-BR">Portuguese - BR</option>
-                        <option value="ru-RU">Russian - RU</option>
-                        <option value="es-ES">Spanish - ES</option>
-                    </select>
+                <td align="left" id = "languageOptions" value = "en-US">
                 </td>
             </tr>
             <tr>
-                <td align="right">Recognition Mode:</td>
-                <td align="left">
-                    <select id="recognitionMode">
-                        <option value="Interactive">Interactive</option>
-                        <option value="Conversation">Conversation</option>
-                        <option value="Dictation">Dictation</option>
-                    </select>
+                <td align="left" id = "recognitionMode" value = "Dictation">
+
                 </td>
             </tr>
             <tr>
-                <td align="right">Format:</td>
-                <td align="left">
-                    <select id="formatOptions">
-                        <option value="Simple" selected="selected">Simple Result</option>
-                        <option value="Detailed">Detailed Result</option>
-                    </select>
+                <td align="left" id="formatOptions" value="Simple">
                 </td>
             </tr>
             <tr>
-                <td align="right">Input:</td>
-                <td align="left">
-                    <select id="inputSource">
-                        <option value="Mic" selected="selected">Microphone</option>
-                        <option value="File">Audio File</option>
-                    </select>
+                <td align="left" id="inputSource" value="Mic">
                 </td>
             </tr>
             <tr>
@@ -199,20 +169,20 @@
                         break;
                     case "SpeechStartDetectedEvent" :
                         UpdateStatus("Listening_DetectedSpeech_Recognizing");
-                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        // console.log(JSON.stringify(event.Result)); // check console for other information in result
                         break;
                     case "SpeechHypothesisEvent" :
                         UpdateRecognizedHypothesis(event.Result.Text, false);
-                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        // console.log(JSON.stringify(event.Result)); // check console for other information in result
                         break;
                     case "SpeechFragmentEvent" :
                         UpdateRecognizedHypothesis(event.Result.Text, true);
-                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        // console.log(JSON.stringify(event.Result)); // check console for other information in result
                         break;
                     case "SpeechEndDetectedEvent" :
                         OnSpeechEndDetected();
                         UpdateStatus("Processing_Adding_Final_Touches");
-                        console.log(JSON.stringify(event.Result)); // check console for other information in result
+                        // console.log(JSON.stringify(event.Result)); // check console for other information in result
                         break;
                     case "SpeechSimplePhraseEvent" :
                         UpdateRecognizedPhrase(JSON.stringify(event.Result, null, 3));
@@ -223,10 +193,10 @@
                     case "RecognitionEndedEvent" :
                         OnComplete();
                         UpdateStatus("Idle");
-                        console.log(JSON.stringify(event)); // Debug information
+                        // console.log(JSON.stringify(event)); // Debug information
                         break;
                     default:
-                        console.log(JSON.stringify(event)); // Debug information
+                        console.log("arg"); // Debug information
                 }
             })
             .On(() => {
@@ -246,6 +216,7 @@
 
     <!-- Browser Hooks -->
     <script>
+        var badWords = ["um", "uh", "like", "actually", "basically", "literally", "ya know", "fine", "shit", "so", "fuck", "bitch", "kinda", "hate", "whatever", "stuff"];
         var startBtn, stopBtn, hypothesisDiv, phraseDiv, statusDiv;
         var key, languageOptions, formatOptions, recognitionMode, inputSource, filePicker;
         var SDK;
@@ -329,7 +300,7 @@
             if (recognizer != null) {
                 RecognizerStop(SDK, recognizer);
             }
-            recognizer = RecognizerSetup(SDK, recognitionMode.value, languageOptions.value, SDK.SpeechResultFormat[formatOptions.value], key.value);
+            recognizer = RecognizerSetup(SDK, recognitionMode.value, languageOptions.value, SDK.SpeechResultFormat[formatOptions.value], "692f7480d0754e20a1d095cf7fc73be1");
         }
 
         function UpdateStatus(status) {
@@ -354,7 +325,15 @@
 
         function UpdateRecognizedPhrase(json) {
             hypothesisDiv.innerHTML = "";
-            phraseDiv.innerHTML += json + "\n";
+            var index = 56;
+            var speech = "";
+
+            // print only the text the user speaks
+            while(json[index] != '\"') {
+                speech += json[index];
+                index += 1;
+            }
+            phraseDiv.innerHTML += speech + "\n";
         }
 
         function OnComplete() {
